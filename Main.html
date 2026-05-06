@@ -2,181 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Granny's Weiner Escape | Loxnezzz Games</title>
+    <title>Loxnezzz Games | MAXIMUM SILLY</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Comic Sans MS', cursive; }
         #hud {
             position: absolute; top: 20px; left: 20px; color: white;
             text-shadow: 2px 2px 4px #000; pointer-events: none; z-index: 10;
         }
-        #timer { font-size: 24px; color: #00ff00; }
+        #timer { font-size: 30px; color: #ff00ff; animation: shake 0.5s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            50% { transform: translate(-1px, -2px) rotate(-1deg); }
+            100% { transform: translate(1px, 1px) rotate(0deg); }
+        }
         #overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; color: red; display: none;
+            background: rgba(255, 0, 255, 0.5); color: white; display: none;
             flex-direction: column; justify-content: center; align-items: center;
             z-index: 100;
         }
-        .death-msg { font-size: 60px; margin-bottom: 20px; text-transform: uppercase; font-weight: bold; }
-        button {
-            padding: 15px 40px; font-size: 20px; cursor: pointer;
-            background: #ff4500; color: white; border: none; border-radius: 5px;
-        }
+        button { padding: 20px; font-size: 25px; cursor: pointer; background: lime; border: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="hud">
-        <div id="timer">SURVIVED: 0s</div>
-        <div id="status" style="color: #00fbff;">Find James Russ! (Blue Block)</div>
+        <div id="timer">SILLY SURVIVAL: 0s</div>
+        <div style="color: yellow;">WARNING: MAXIMUM SILLINESS DETECTED</div>
     </div>
 
     <div id="overlay">
-        <div class="death-msg" id="deathReason">CAUGHT</div>
-        <button onclick="location.reload()">RETRY ESCAPE</button>
+        <h1 style="font-size: 80px;">GRANNY GOT SILLY!</h1>
+        <button onclick="location.reload()">RE-SILLY</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- ENGINE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020202);
-        scene.fog = new THREE.Fog(0x020202, 2, 18);
-
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // --- HOUSE CONSTRUCTION ---
-        const floor = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 0.2, 30), 
-            new THREE.MeshStandardMaterial({ color: 0x221105 })
-        );
-        floor.receiveShadow = true;
+        // --- THE HOUSE OF SILLY ---
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+        floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
 
-        function createWall(w, h, d, x, z) {
-            const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x443322 }));
-            wall.position.set(x, h/2, z);
-            wall.castShadow = true;
-            wall.receiveShadow = true;
-            scene.add(wall);
-        }
-        createWall(30, 5, 0.5, 0, 15);  // Walls
-        createWall(30, 5, 0.5, 0, -15);
-        createWall(0.5, 5, 30, 15, 0);
-        createWall(0.5, 5, 30, -15, 0);
-
-        // --- MODELS ---
+        // --- SILLY MODELS ---
         const playerGroup = new THREE.Group();
-        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
-        body.rotation.z = Math.PI / 2;
-        playerGroup.add(body);
-        
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
-        head.position.set(0.6, 0.1, 0);
-        playerGroup.add(head);
-        
-        const flashlight = new THREE.SpotLight(0xffffff, 2);
-        flashlight.angle = Math.PI / 6;
-        flashlight.position.set(0.6, 0.2, 0);
-        flashlight.castShadow = true;
-        playerGroup.add(flashlight);
-        playerGroup.add(flashlight.target);
-        flashlight.target.position.set(5, 0, 0);
-
-        playerGroup.position.y = 0.4;
+        // The "Extra Long" Weiner Dog
+        const dog = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x8B4513 }));
+        playerGroup.add(dog);
+        playerGroup.position.y = 0.5;
         scene.add(playerGroup);
 
-        const granny = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.2), new THREE.MeshStandardMaterial({ color: 0xff00ff }));
-        granny.position.set(10, 0.8, 10);
+        const granny = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff00ff }));
+        granny.position.set(12, 1, 12);
         scene.add(granny);
 
-        const jamesRuss = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshStandardMaterial({ color: 0x00fbff, emissive: 0x00fbff }));
-        jamesRuss.position.set(-10, 1, -10);
+        const jamesRuss = new THREE.Mesh(new THREE.BoxGeometry(1.5, 4, 1.5), new THREE.MeshBasicMaterial({ color: 0x00fbff }));
+        jamesRuss.position.set(-10, 2, -10);
         scene.add(jamesRuss);
 
         let liam = null;
-
-        // --- STATE & INPUT ---
-        let secondsAlive = 0;
+        let seconds = 0;
         let isDead = false;
-        let powerUpActive = false;
         const keys = {};
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
 
         setInterval(() => {
-            if (!isDead) {
-                secondsAlive++;
-                document.getElementById('timer').innerText = `SURVIVED: ${secondsAlive}s`;
-                if (secondsAlive === 60) spawnLiam();
+            if (isDead) return;
+            seconds++;
+            document.getElementById('timer').innerText = `SILLY SURVIVAL: ${seconds}s`;
+            if (seconds === 60) {
+                liam = new THREE.Mesh(new THREE.BoxGeometry(3, 10, 3), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+                liam.position.set(0, 5, -20);
+                scene.add(liam);
             }
         }, 1000);
 
-        function spawnLiam() {
-            liam = new THREE.Mesh(new THREE.BoxGeometry(1.5, 4, 1.5), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-            liam.position.set(-12, 2, 12);
-            scene.add(liam);
-            document.getElementById('status').innerText = "LIAM HAS SPAWNED! RUN!";
-        }
-
-        // --- MAIN LOOP ---
         function animate() {
             if (isDead) return;
             requestAnimationFrame(animate);
 
-            // Movement
-            if (keys['KeyW']) playerGroup.translateX(0.15);
-            if (keys['KeyS']) playerGroup.translateX(-0.1);
-            if (keys['KeyA']) playerGroup.rotation.y += 0.05;
-            if (keys['KeyD']) playerGroup.rotation.y -= 0.05;
+            // Rainbow Background
+            scene.background = new THREE.Color(`hsl(${(Date.now() / 10) % 360}, 100%, 20%)`);
 
-            // Granny AI
+            // Wobble Movement
+            const moveSpeed = 0.2;
+            if (keys['KeyW']) {
+                playerGroup.translateX(moveSpeed);
+                playerGroup.position.y = 0.5 + Math.sin(Date.now() / 100) * 0.2; // Bounces while walking
+            }
+            if (keys['KeyS']) playerGroup.translateX(-moveSpeed);
+            if (keys['KeyA']) playerGroup.rotation.y += 0.1;
+            if (keys['KeyD']) playerGroup.rotation.y -= 0.1;
+
+            // Silly Granny Logic
             const gDir = new THREE.Vector3().subVectors(playerGroup.position, granny.position).normalize();
-            granny.position.addScaledVector(gDir, powerUpActive ? 0.03 : 0.07);
+            granny.position.addScaledVector(gDir, 0.08);
+            granny.rotation.x += 0.2; // Granny rolls like a ball
+            granny.scale.setScalar(1 + Math.sin(Date.now() / 200) * 0.5); // Granny pulses
 
-            // Liam AI
+            // Liam Logic
             if (liam) {
                 const lDir = new THREE.Vector3().subVectors(playerGroup.position, liam.position).normalize();
-                liam.position.addScaledVector(lDir, 0.14);
+                liam.position.addScaledVector(lDir, 0.15);
+                liam.rotation.z += 0.1; 
             }
 
-            // James Russ Interaction
-            if (!powerUpActive && playerGroup.position.distanceTo(jamesRuss.position) < 1.5) {
-                powerUpActive = true;
-                jamesRuss.material.color.setHex(0x555555);
-                document.getElementById('status').innerText = "JAMES RUSS BUFF: Granny Slower!";
-            }
+            // James Russ Spin
+            jamesRuss.rotation.y += 0.1;
 
-            // Camera Setup (Third Person)
-            const offset = new THREE.Vector3(-5, 4, 0).applyMatrix4(playerGroup.matrixWorld);
-            camera.position.lerp(offset, 0.1);
+            // Camera
+            const camOffset = new THREE.Vector3(-10, 8, 0).applyMatrix4(playerGroup.matrixWorld);
+            camera.position.lerp(camOffset, 0.1);
             camera.lookAt(playerGroup.position);
 
             // Collisions
-            if (playerGroup.position.distanceTo(granny.position) < 0.9) die("CAUGHT BY GRANNY");
-            if (liam && playerGroup.position.distanceTo(liam.position) < 1.2) die("LIAM GOT YOU");
+            if (playerGroup.position.distanceTo(granny.position) < 2) die();
+            if (liam && playerGroup.position.distanceTo(liam.position) < 3) die();
 
             renderer.render(scene, camera);
         }
 
-        function die(reason) {
+        function die() {
             isDead = true;
-            document.getElementById('deathReason').innerText = reason;
             document.getElementById('overlay').style.display = 'flex';
         }
 
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
