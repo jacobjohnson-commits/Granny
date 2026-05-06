@@ -1,28 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Granny's Weiner Escape | Loxnezzz Games</title>
+    <title>Granny's Weiner Escape | Chromebook Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div id="hud">
         <div id="timer">SURVIVAL: 0s</div>
-        <div id="objective">OBJECTIVE: Find the Golden Bone to escape!</div>
+        <div>GOAL: Reach the Golden Sphere!</div>
     </div>
-
     <div id="overlay">
-        <div class="death-msg" id="deathReason">CAUGHT</div>
+        <h1 id="deathReason">CAUGHT</h1>
         <button onclick="location.reload()">TRY AGAIN</button>
     </div>
-
     <div id="winScreen">
-        <h1 style="color: gold; font-size: 60px;">FREEDOM!</h1>
-        <p>You escaped the house!</p>
+        <h1 style="color: gold;">YOU ESCAPED!</h1>
         <button onclick="location.reload()">PLAY AGAIN</button>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="game.js"></script>
 </body>
