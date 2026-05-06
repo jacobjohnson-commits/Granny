@@ -1,18 +1,61 @@
-body { margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', monospace; }
-
-#hud {
-    position: absolute; top: 10px; left: 10px; color: #0f0;
-    z-index: 10; pointer-events: none;
+body { 
+    margin: 0; 
+    overflow: hidden; 
+    background: #000; 
+    font-family: 'Courier New', Courier, monospace; 
 }
 
-#overlay, #winScreen {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); color: red; display: none;
-    flex-direction: column; justify-content: center; align-items: center;
+#hud {
+    position: absolute; 
+    top: 20px; 
+    left: 20px; 
+    color: white;
+    text-shadow: 2px 2px 4px #000; 
+    pointer-events: none; 
+    z-index: 10;
+}
+
+#timer { font-size: 28px; color: #00ff00; }
+#counter { font-size: 24px; color: #fff; }
+
+#silly-warning { 
+    font-size: 20px; 
+    color: #ff00ff; 
+    display: none; 
+    font-weight: bold;
+    animation: blink 0.5s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.screen {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: black; 
+    display: none;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
     z-index: 100;
 }
 
+.death-text { color: red; font-size: 50px; text-align: center; }
+.win-text { color: gold; font-size: 60px; }
+
 button {
-    margin-top: 20px; padding: 10px 30px; font-size: 20px;
-    background: #444; color: white; border: 2px solid #0f0; cursor: pointer;
+    margin-top: 30px;
+    padding: 15px 40px;
+    font-size: 20px;
+    cursor: pointer;
+    background: #222;
+    color: white;
+    border: 2px solid white;
 }
+
+button:hover { background: #444; border-color: #ff0000; }
