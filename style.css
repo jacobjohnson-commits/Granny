@@ -1,22 +1,24 @@
-body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; }
 
 #hud {
     position: absolute; top: 20px; left: 20px; color: white;
-    text-shadow: 2px 2px 4px #000; pointer-events: none;
+    text-shadow: 2px 2px 5px #000; pointer-events: none; z-index: 10;
 }
 
-#timer { font-size: 24px; color: #00ff00; }
+#timer { font-size: 28px; color: #00ff00; margin-bottom: 10px; }
 
-#overlay {
+#overlay, #winScreen {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: black; color: red; display: none;
+    background: black; display: none;
     flex-direction: column; justify-content: center; align-items: center;
     z-index: 100;
 }
 
-.death-msg { font-size: 60px; margin-bottom: 20px; text-transform: uppercase; }
+.death-msg { font-size: 60px; color: red; margin-bottom: 20px; font-weight: bold; }
 
 button {
     padding: 15px 40px; font-size: 20px; cursor: pointer;
-    background: #ff4500; color: white; border: none; border-radius: 5px;
+    background: #444; color: white; border: 2px solid white;
 }
+
+button:hover { background: red; }
