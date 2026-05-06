@@ -2,143 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>3D Weiner Escape ft. James Russ</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; }
-        #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; color: red; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            z-index: 100;
-        }
-        #hud {
-            position: absolute; top: 20px; left: 20px; color: white;
-            text-shadow: 2px 2px 2px black; pointer-events: none;
-        }
-        .msg { color: #00fbff; font-weight: bold; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Granny's Weiner Escape | Loxnezzz Games</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="hud">
-        <h1>LOXNEZZZ GAMES: 3D PROTOTYPE</h1>
-        <p>MOVE: WASD | ESCAPE GRANNY</p>
-        <p id="objective" class="msg">OBJECTIVE: Find JAMES RUSS for help!</p>
+        <div id="timer">SURVIVED: 0s</div>
+        <div id="status" style="color: #00fbff;">Find James Russ!</div>
     </div>
 
     <div id="overlay">
-        <h1 style="font-size: 80px;">CAUGHT BY GRANNY</h1>
-        <button onclick="location.reload()" style="padding: 15px 30px; cursor: pointer; background: red; color: white; border: none; font-weight: bold;">TRY AGAIN</button>
+        <div class="death-msg" id="deathReason">CAUGHT</div>
+        <button onclick="location.reload()">RETRY ESCAPE</button>
     </div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-
-        // --- ENGINE SETUP ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.Fog(0x050505, 1, 12);
-
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // --- LIGHTING ---
-        const light = new THREE.PointLight(0xffffff, 60, 100);
-        light.position.set(0, 5, 0);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x222222));
-
-        // --- ACTORS ---
-        
-        // Floor
-        const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(30, 30),
-            new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
-        );
-        floor.rotation.x = -Math.PI / 2;
-        scene.add(floor);
-
-        // Player (Dachshund)
-        const player = new THREE.Mesh(
-            new THREE.BoxGeometry(0.5, 0.4, 1.2),
-            new THREE.MeshStandardMaterial({ color: 0x8B4513 })
-        );
-        player.position.y = 0.2;
-        scene.add(player);
-
-        // Granny
-        const granny = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.4, 1, 4, 8),
-            new THREE.MeshStandardMaterial({ color: 0xff00ff }) // Bright pink for high visibility
-        );
-        granny.position.set(8, 0.7, 8);
-        scene.add(granny);
-
-        // NEW CHARACTER: James Russ (E-sports Manager)
-        const jamesRuss = new THREE.Mesh(
-            new THREE.BoxGeometry(0.8, 1.5, 0.8),
-            new THREE.MeshStandardMaterial({ color: 0x00fbff, emissive: 0x00fbff, emissiveIntensity: 0.5 })
-        );
-        jamesRuss.position.set(-5, 0.75, -5);
-        scene.add(jamesRuss);
-
-        // --- INPUT & STATE ---
-        const keys = {};
-        let isDead = false;
-        let hasJamesHelp = false;
-        window.addEventListener('keydown', (e) => keys[e.code] = true);
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-        // --- GAME LOOP ---
-        function animate() {
-            if (isDead) return;
-            requestAnimationFrame(animate);
-
-            // Movement Logic
-            const speed = 0.12;
-            if (keys['KeyW']) player.position.z -= speed;
-            if (keys['KeyS']) player.position.z += speed;
-            if (keys['KeyA']) player.position.x -= speed;
-            if (keys['KeyD']) player.position.x += speed;
-
-            // AI Logic: Granny follows player
-            const grannySpeed = hasJamesHelp ? 0.02 : 0.055; // James Russ makes Granny slower/smaller
-            const dir = new THREE.Vector3().subVectors(player.position, granny.position).normalize();
-            granny.position.addScaledVector(dir, grannySpeed);
-
-            // Logic: Contact with James Russ
-            if (!hasJamesHelp && player.position.distanceTo(jamesRuss.position) < 1.2) {
-                hasJamesHelp = true;
-                granny.scale.set(0.5, 0.5, 0.5); // "Strategic Shrinkage"
-                document.getElementById('objective').innerText = "JAMES RUSS APPLIED STRATEGY! GRANNY WEAKENED!";
-                document.getElementById('objective').style.color = "#00fbff";
-                jamesRuss.material.color.setHex(0xffffff); // Fade him out after use
-            }
-
-            // Camera follow
-            camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 5, player.position.z + 5), 0.1);
-            camera.lookAt(player.position);
-
-            // Death Check
-            if (player.position.distanceTo(granny.position) < (hasJamesHelp ? 0.5 : 0.9)) {
-                die();
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        function die() {
-            isDead = true;
-            document.getElementById('overlay').style.display = 'flex';
-        }
-
-        animate();
-    </script>
+    <script type="module" src="game.js"></script>
 </body>
 </html>
