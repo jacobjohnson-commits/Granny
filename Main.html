@@ -1,117 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Granny's Weiner Escape - Prototype</title>
+    <meta charset="UTF-8">
+    <title>3D Weiner Escape ft. James Russ</title>
     <style>
-        body { background: #1a1a1a; display: flex; flex-direction: column; align-items: center; color: white; font-family: sans-serif; overflow: hidden; }
-        canvas { background: #333; border: 4px solid #ff4500; box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: none; }
-        .ui { margin-top: 10px; text-align: center; }
-        #deathScreen { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: black; color: red; display: none; 
-            flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 10; 
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; }
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; color: red; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100;
         }
-        button { padding: 10px 20px; font-weight: bold; cursor: pointer; background: #ff4500; border: none; color: white; }
+        #hud {
+            position: absolute; top: 20px; left: 20px; color: white;
+            text-shadow: 2px 2px 2px black; pointer-events: none;
+        }
+        .msg { color: #00fbff; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="ui">
-        <h1>WEINER ESCAPE: PROTOTYPE</h1>
-        <p>Use <b>WASD</b> or <b>ARROWS</b> to escape Granny!</p>
+    <div id="hud">
+        <h1>LOXNEZZZ GAMES: 3D PROTOTYPE</h1>
+        <p>MOVE: WASD | ESCAPE GRANNY</p>
+        <p id="objective" class="msg">OBJECTIVE: Find JAMES RUSS for help!</p>
     </div>
 
-    <canvas id="gameCanvas" width="800" height="500"></canvas>
-
-    <div id="deathScreen">
-        <h1>YOU GOT CAUGHT!</h1>
-        <p>Granny put you in a scratchy sweater.</p>
-        <button onclick="resetGame()">RETRY ESCAPE</button>
+    <div id="overlay">
+        <h1 style="font-size: 80px;">CAUGHT BY GRANNY</h1>
+        <button onclick="location.reload()" style="padding: 15px 30px; cursor: pointer; background: red; color: white; border: none; font-weight: bold;">TRY AGAIN</button>
     </div>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const deathScreen = document.getElementById('deathScreen');
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
 
-    // Game Objects
-    let player = { x: 50, y: 250, size: 20, speed: 5, color: '#D2691E' }; // The Dachshund
-    let granny = { x: 700, y: 250, size: 30, speed: 2.5, color: '#cccccc' }; // The Nemesis
-    let keys = {};
-    let isGameOver = false;
+    <script type="module">
+        import * as THREE from 'three';
 
-    // Input Listeners
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
+        // --- ENGINE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.Fog(0x050505, 1, 12);
 
-    function resetGame() {
-        player.x = 50; player.y = 250;
-        granny.x = 700; granny.y = 250;
-        isGameOver = false;
-        deathScreen.style.display = 'none';
-        requestAnimationFrame(update);
-    }
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    function update() {
-        if (isGameOver) return;
+        // --- LIGHTING ---
+        const light = new THREE.PointLight(0xffffff, 60, 100);
+        light.position.set(0, 5, 0);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x222222));
 
-        // 1. Player Movement Logic
-        if (keys['KeyW'] || keys['ArrowUp']) player.y -= player.speed;
-        if (keys['KeyS'] || keys['ArrowDown']) player.y += player.speed;
-        if (keys['KeyA'] || keys['ArrowLeft']) player.x -= player.speed;
-        if (keys['KeyD'] || keys['ArrowRight']) player.x += player.speed;
-
-        // 2. Simple AI: Granny stalks the player
-        let dx = player.x - granny.x;
-        let dy = player.y - granny.y;
-        let distance = Math.sqrt(dx*dx + dy*dy);
+        // --- ACTORS ---
         
-        if (distance > 0) {
-            granny.x += (dx / distance) * granny.speed;
-            granny.y += (dy / distance) * granny.speed;
+        // Floor
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(30, 30),
+            new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // Player (Dachshund)
+        const player = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 0.4, 1.2),
+            new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+        );
+        player.position.y = 0.2;
+        scene.add(player);
+
+        // Granny
+        const granny = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.4, 1, 4, 8),
+            new THREE.MeshStandardMaterial({ color: 0xff00ff }) // Bright pink for high visibility
+        );
+        granny.position.set(8, 0.7, 8);
+        scene.add(granny);
+
+        // NEW CHARACTER: James Russ (E-sports Manager)
+        const jamesRuss = new THREE.Mesh(
+            new THREE.BoxGeometry(0.8, 1.5, 0.8),
+            new THREE.MeshStandardMaterial({ color: 0x00fbff, emissive: 0x00fbff, emissiveIntensity: 0.5 })
+        );
+        jamesRuss.position.set(-5, 0.75, -5);
+        scene.add(jamesRuss);
+
+        // --- INPUT & STATE ---
+        const keys = {};
+        let isDead = false;
+        let hasJamesHelp = false;
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        // --- GAME LOOP ---
+        function animate() {
+            if (isDead) return;
+            requestAnimationFrame(animate);
+
+            // Movement Logic
+            const speed = 0.12;
+            if (keys['KeyW']) player.position.z -= speed;
+            if (keys['KeyS']) player.position.z += speed;
+            if (keys['KeyA']) player.position.x -= speed;
+            if (keys['KeyD']) player.position.x += speed;
+
+            // AI Logic: Granny follows player
+            const grannySpeed = hasJamesHelp ? 0.02 : 0.055; // James Russ makes Granny slower/smaller
+            const dir = new THREE.Vector3().subVectors(player.position, granny.position).normalize();
+            granny.position.addScaledVector(dir, grannySpeed);
+
+            // Logic: Contact with James Russ
+            if (!hasJamesHelp && player.position.distanceTo(jamesRuss.position) < 1.2) {
+                hasJamesHelp = true;
+                granny.scale.set(0.5, 0.5, 0.5); // "Strategic Shrinkage"
+                document.getElementById('objective').innerText = "JAMES RUSS APPLIED STRATEGY! GRANNY WEAKENED!";
+                document.getElementById('objective').style.color = "#00fbff";
+                jamesRuss.material.color.setHex(0xffffff); // Fade him out after use
+            }
+
+            // Camera follow
+            camera.position.lerp(new THREE.Vector3(player.position.x, player.position.y + 5, player.position.z + 5), 0.1);
+            camera.lookAt(player.position);
+
+            // Death Check
+            if (player.position.distanceTo(granny.position) < (hasJamesHelp ? 0.5 : 0.9)) {
+                die();
+            }
+
+            renderer.render(scene, camera);
         }
 
-        // 3. Collision Detection (AABB)
-        if (player.x < granny.x + granny.size &&
-            player.x + player.size > granny.x &&
-            player.y < granny.y + granny.size &&
-            player.y + player.size > granny.y) {
-            triggerDeath();
+        function die() {
+            isDead = true;
+            document.getElementById('overlay').style.display = 'flex';
         }
 
-        // 4. Boundary Checks
-        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
-
-        draw();
-        requestAnimationFrame(update);
-    }
-
-    function triggerDeath() {
-        isGameOver = true;
-        deathScreen.style.display = 'flex';
-    }
-
-    function draw() {
-        // Clear Frame
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw Player (The "Long" Dog)
-        ctx.fillStyle = player.color;
-        ctx.fillRect(player.x, player.y, player.size * 2, player.size); // Rectangular for "long" dog
-        
-        // Draw Granny
-        ctx.fillStyle = granny.color;
-        ctx.beginPath();
-        ctx.arc(granny.x + 15, granny.y + 15, granny.size/2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "white"; // Granny's hair
-        ctx.fillRect(granny.x + 5, granny.y - 5, 20, 10);
-    }
-
-    // Start Loop
-    update();
-</script>
+        animate();
+    </script>
 </body>
 </html>
