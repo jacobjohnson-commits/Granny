@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Granny's Weiner Escape - Prototype</title>
+    <style>
+        body { background: #1a1a1a; display: flex; flex-direction: column; align-items: center; color: white; font-family: sans-serif; overflow: hidden; }
+        canvas { background: #333; border: 4px solid #ff4500; box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: none; }
+        .ui { margin-top: 10px; text-align: center; }
+        #deathScreen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: black; color: red; display: none; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 10; 
+        }
+        button { padding: 10px 20px; font-weight: bold; cursor: pointer; background: #ff4500; border: none; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="ui">
+        <h1>WEINER ESCAPE: PROTOTYPE</h1>
+        <p>Use <b>WASD</b> or <b>ARROWS</b> to escape Granny!</p>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <div id="deathScreen">
+        <h1>YOU GOT CAUGHT!</h1>
+        <p>Granny put you in a scratchy sweater.</p>
+        <button onclick="resetGame()">RETRY ESCAPE</button>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const deathScreen = document.getElementById('deathScreen');
+
+    // Game Objects
+    let player = { x: 50, y: 250, size: 20, speed: 5, color: '#D2691E' }; // The Dachshund
+    let granny = { x: 700, y: 250, size: 30, speed: 2.5, color: '#cccccc' }; // The Nemesis
+    let keys = {};
+    let isGameOver = false;
+
+    // Input Listeners
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    function resetGame() {
+        player.x = 50; player.y = 250;
+        granny.x = 700; granny.y = 250;
+        isGameOver = false;
+        deathScreen.style.display = 'none';
+        requestAnimationFrame(update);
+    }
+
+    function update() {
+        if (isGameOver) return;
+
+        // 1. Player Movement Logic
+        if (keys['KeyW'] || keys['ArrowUp']) player.y -= player.speed;
+        if (keys['KeyS'] || keys['ArrowDown']) player.y += player.speed;
+        if (keys['KeyA'] || keys['ArrowLeft']) player.x -= player.speed;
+        if (keys['KeyD'] || keys['ArrowRight']) player.x += player.speed;
+
+        // 2. Simple AI: Granny stalks the player
+        let dx = player.x - granny.x;
+        let dy = player.y - granny.y;
+        let distance = Math.sqrt(dx*dx + dy*dy);
+        
+        if (distance > 0) {
+            granny.x += (dx / distance) * granny.speed;
+            granny.y += (dy / distance) * granny.speed;
+        }
+
+        // 3. Collision Detection (AABB)
+        if (player.x < granny.x + granny.size &&
+            player.x + player.size > granny.x &&
+            player.y < granny.y + granny.size &&
+            player.y + player.size > granny.y) {
+            triggerDeath();
+        }
+
+        // 4. Boundary Checks
+        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+        draw();
+        requestAnimationFrame(update);
+    }
+
+    function triggerDeath() {
+        isGameOver = true;
+        deathScreen.style.display = 'flex';
+    }
+
+    function draw() {
+        // Clear Frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Player (The "Long" Dog)
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.size * 2, player.size); // Rectangular for "long" dog
+        
+        // Draw Granny
+        ctx.fillStyle = granny.color;
+        ctx.beginPath();
+        ctx.arc(granny.x + 15, granny.y + 15, granny.size/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "white"; // Granny's hair
+        ctx.fillRect(granny.x + 5, granny.y - 5, 20, 10);
+    }
+
+    // Start Loop
+    update();
+</script>
+</body>
+</html>
