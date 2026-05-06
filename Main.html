@@ -2,15 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Granny's Weiner Escape | Loxnezzz Games</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #hud {
+            position: absolute; top: 20px; left: 20px; color: white;
+            text-shadow: 2px 2px 4px #000; pointer-events: none; z-index: 10;
+        }
+        #timer { font-size: 24px; color: #00ff00; }
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; color: red; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .death-msg { font-size: 60px; margin-bottom: 20px; text-transform: uppercase; font-weight: bold; }
+        button {
+            padding: 15px 40px; font-size: 20px; cursor: pointer;
+            background: #ff4500; color: white; border: none; border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
 
     <div id="hud">
         <div id="timer">SURVIVED: 0s</div>
-        <div id="status" style="color: #00fbff;">Find James Russ!</div>
+        <div id="status" style="color: #00fbff;">Find James Russ! (Blue Block)</div>
     </div>
 
     <div id="overlay">
@@ -18,9 +35,148 @@
         <button onclick="location.reload()">RETRY ESCAPE</button>
     </div>
 
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- ENGINE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020202);
+        scene.fog = new THREE.Fog(0x020202, 2, 18);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // --- HOUSE CONSTRUCTION ---
+        const floor = new THREE.Mesh(
+            new THREE.BoxGeometry(30, 0.2, 30), 
+            new THREE.MeshStandardMaterial({ color: 0x221105 })
+        );
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        function createWall(w, h, d, x, z) {
+            const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x443322 }));
+            wall.position.set(x, h/2, z);
+            wall.castShadow = true;
+            wall.receiveShadow = true;
+            scene.add(wall);
+        }
+        createWall(30, 5, 0.5, 0, 15);  // Walls
+        createWall(30, 5, 0.5, 0, -15);
+        createWall(0.5, 5, 30, 15, 0);
+        createWall(0.5, 5, 30, -15, 0);
+
+        // --- MODELS ---
+        const playerGroup = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.8), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
+        body.rotation.z = Math.PI / 2;
+        playerGroup.add(body);
+        
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
+        head.position.set(0.6, 0.1, 0);
+        playerGroup.add(head);
+        
+        const flashlight = new THREE.SpotLight(0xffffff, 2);
+        flashlight.angle = Math.PI / 6;
+        flashlight.position.set(0.6, 0.2, 0);
+        flashlight.castShadow = true;
+        playerGroup.add(flashlight);
+        playerGroup.add(flashlight.target);
+        flashlight.target.position.set(5, 0, 0);
+
+        playerGroup.position.y = 0.4;
+        scene.add(playerGroup);
+
+        const granny = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.2), new THREE.MeshStandardMaterial({ color: 0xff00ff }));
+        granny.position.set(10, 0.8, 10);
+        scene.add(granny);
+
+        const jamesRuss = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.8), new THREE.MeshStandardMaterial({ color: 0x00fbff, emissive: 0x00fbff }));
+        jamesRuss.position.set(-10, 1, -10);
+        scene.add(jamesRuss);
+
+        let liam = null;
+
+        // --- STATE & INPUT ---
+        let secondsAlive = 0;
+        let isDead = false;
+        let powerUpActive = false;
+        const keys = {};
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        setInterval(() => {
+            if (!isDead) {
+                secondsAlive++;
+                document.getElementById('timer').innerText = `SURVIVED: ${secondsAlive}s`;
+                if (secondsAlive === 60) spawnLiam();
+            }
+        }, 1000);
+
+        function spawnLiam() {
+            liam = new THREE.Mesh(new THREE.BoxGeometry(1.5, 4, 1.5), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+            liam.position.set(-12, 2, 12);
+            scene.add(liam);
+            document.getElementById('status').innerText = "LIAM HAS SPAWNED! RUN!";
+        }
+
+        // --- MAIN LOOP ---
+        function animate() {
+            if (isDead) return;
+            requestAnimationFrame(animate);
+
+            // Movement
+            if (keys['KeyW']) playerGroup.translateX(0.15);
+            if (keys['KeyS']) playerGroup.translateX(-0.1);
+            if (keys['KeyA']) playerGroup.rotation.y += 0.05;
+            if (keys['KeyD']) playerGroup.rotation.y -= 0.05;
+
+            // Granny AI
+            const gDir = new THREE.Vector3().subVectors(playerGroup.position, granny.position).normalize();
+            granny.position.addScaledVector(gDir, powerUpActive ? 0.03 : 0.07);
+
+            // Liam AI
+            if (liam) {
+                const lDir = new THREE.Vector3().subVectors(playerGroup.position, liam.position).normalize();
+                liam.position.addScaledVector(lDir, 0.14);
+            }
+
+            // James Russ Interaction
+            if (!powerUpActive && playerGroup.position.distanceTo(jamesRuss.position) < 1.5) {
+                powerUpActive = true;
+                jamesRuss.material.color.setHex(0x555555);
+                document.getElementById('status').innerText = "JAMES RUSS BUFF: Granny Slower!";
+            }
+
+            // Camera Setup (Third Person)
+            const offset = new THREE.Vector3(-5, 4, 0).applyMatrix4(playerGroup.matrixWorld);
+            camera.position.lerp(offset, 0.1);
+            camera.lookAt(playerGroup.position);
+
+            // Collisions
+            if (playerGroup.position.distanceTo(granny.position) < 0.9) die("CAUGHT BY GRANNY");
+            if (liam && playerGroup.position.distanceTo(liam.position) < 1.2) die("LIAM GOT YOU");
+
+            renderer.render(scene, camera);
+        }
+
+        function die(reason) {
+            isDead = true;
+            document.getElementById('deathReason').innerText = reason;
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
-    <script type="module" src="game.js"></script>
 </body>
 </html>
