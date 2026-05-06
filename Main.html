@@ -1,22 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Granny's Weiner Escape | Chromebook Edition</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evil Granny: Weiner Escape | Loxnezzz Games</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="hud">
-        <div id="timer">SURVIVAL: 0s</div>
-        <div>GOAL: Reach the Golden Sphere!</div>
+        <div id="timer">SURVIVED: 0s</div>
+        <div id="counter">BONES: 0/5</div>
+        <div id="silly-warning">⚠️ SILLY TIME: THE EXIT HAS APPEARED! ⚠️</div>
     </div>
-    <div id="overlay">
-        <h1 id="deathReason">CAUGHT</h1>
+
+    <div id="overlay" class="screen">
+        <h1 class="death-text">GRANNY CAUGHT YOU</h1>
+        <p>She turned you into a sweater...</p>
         <button onclick="location.reload()">TRY AGAIN</button>
     </div>
-    <div id="winScreen">
-        <h1 style="color: gold;">YOU ESCAPED!</h1>
+
+    <div id="winScreen" class="screen">
+        <h1 class="win-text">FREEDOM!</h1>
+        <p>You escaped with all the bones!</p>
         <button onclick="location.reload()">PLAY AGAIN</button>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="game.js"></script>
 </body>
