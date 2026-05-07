@@ -1,61 +1,25 @@
-body { 
-    margin: 0; 
-    overflow: hidden; 
-    background: #000; 
-    font-family: 'Courier New', Courier, monospace; 
-}
-
+body { margin: 0; overflow: hidden; background: #000; font-family: 'Georgia', serif; }
 #hud {
-    position: absolute; 
-    top: 20px; 
-    left: 20px; 
-    color: white;
-    text-shadow: 2px 2px 4px #000; 
-    pointer-events: none; 
-    z-index: 10;
+    position: absolute; top: 20px; left: 20px; color: #fff;
+    text-shadow: 2px 2px 8px #f00; pointer-events: none; z-index: 10;
 }
-
-#timer { font-size: 28px; color: #00ff00; }
-#counter { font-size: 24px; color: #fff; }
-
+#timer { font-size: 32px; font-weight: bold; }
+#counter { font-size: 24px; color: #bbb; }
 #silly-warning { 
-    font-size: 20px; 
-    color: #ff00ff; 
-    display: none; 
-    font-weight: bold;
-    animation: blink 0.5s infinite;
+    display: none; color: #ff00ff; font-weight: bold; 
+    animation: shake 0.2s infinite; 
 }
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0; }
+@keyframes shake {
+    0% { transform: translate(1px, 1px); }
+    100% { transform: translate(-1px, -1px); }
 }
-
 .screen {
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background: black; 
-    display: none;
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center;
-    z-index: 100;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, #200, #000); display: none;
+    flex-direction: column; justify-content: center; align-items: center; z-index: 100;
 }
-
-.death-text { color: red; font-size: 50px; text-align: center; }
-.win-text { color: gold; font-size: 60px; }
-
+.death-text { color: red; font-size: 70px; text-shadow: 0 0 20px black; }
 button {
-    margin-top: 30px;
-    padding: 15px 40px;
-    font-size: 20px;
-    cursor: pointer;
-    background: #222;
-    color: white;
-    border: 2px solid white;
+    margin-top: 30px; padding: 15px 50px; font-size: 20px;
+    background: #111; color: white; border: 1px solid red; cursor: pointer;
 }
-
-button:hover { background: #444; border-color: #ff0000; }
